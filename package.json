@@ -22,13 +22,13 @@
   "engines": [
     "node >= 0.10.26"
   ],
-
   "main": "sn-node.js",
   "dependencies": {
-    "request": "2.27.x",
-    "xml2js": "0.4.x",
     "async": "0.2.x",
-    "underscore": "1.8.x"
+    "request": "2.27.x",
+    "underscore": "1.8.x",
+    "xml": "^1.0.1",
+    "xml2js": "0.4.x"
   },
   "readmeFilename": "README.md",
   "_id": "sn-node@0.0.4",

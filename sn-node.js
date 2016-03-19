@@ -2,6 +2,7 @@ var parseString = require('xml2js').parseString;
 var _ = require('underscore');
 var fs = require('fs');
 var async = require('async');
+var xml = require('xml');
 
 var HEADERS = {
     'Connection': 'keep-alive',
@@ -459,7 +460,6 @@ function ServiceNow(instance, user, pass){
                 'sysparm_type' : 'save_list',
                 'sysparm_chars' : this._getXMLSerialized()
             };
-
             self.post( 'xmlhttp.do' , data, function(response){
                     parseString(response, function (err, result) {
                         if( result.xml.hasOwnProperty('item') ){
@@ -476,13 +476,16 @@ function ServiceNow(instance, user, pass){
         };
 
         this._getXMLSerialized = function() {
+            var tableName = this.getTableName();
 
-            var updateString = '<record_update id=\'id_goes_here\' table=\'';
-            updateString += this.getTableName() + '\'>';
-            updateString += '<' + this.getTableName() + '>';
+            var xmlObj = {};
+            xmlObj.record_update = [{
+                _attr: {id: this.sys_id, table: tableName},
+            }];
 
-
+            var fields = [];
             for(var xname in this) {
+                var obj = {};
                 if (this.ignoreNames[xname])
                     continue;
 
@@ -491,14 +494,16 @@ function ServiceNow(instance, user, pass){
                 if (!v)
                     v = 'NULL';
 
-                updateString+='<' + xname + '>' + v + '</' + xname + '>';
+                obj[xname] = {_cdata : v};
 
+                fields.push(obj);
             }
 
-            updateString+='</' + this.getTableName() + '>';
-            updateString+='</record_update>';
+            var fieldObj = {};
+            fieldObj[tableName] = fields;
+            xmlObj.record_update.push(fieldObj);
 
-            return updateString;
+            return xml(xmlObj);
         };
 
         this.z = null;
